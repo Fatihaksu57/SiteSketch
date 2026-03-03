@@ -868,6 +868,12 @@
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                         </svg> Anleitung</button>
+                    <button class="btn btn-secondary" onclick="app.showSettings()" style="padding:8px 12px"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="#ed6d0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align:middle;display:inline-block;">
+                            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg></button>
                 </div>
                 <div class="project-grid" id="projectGrid"></div>
             </div>
@@ -1248,6 +1254,43 @@
                     <div class="modal-body">
                         <p class="text-muted mb-4">Mehrere Treffer gefunden:</p>
                         <div class="geocode-results" id="geocodeResults"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="settingsModal" style="display:none">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Einstellungen</h3><button class="modal-close" onclick="app.closeSettings()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">Suchregion für Adresseingabe</label>
+                            <select class="form-input" id="settingsRegion" onchange="app.saveSettings()">
+                                <option value="">Ganz Deutschland</option>
+                                <option value="52.52,13.405,25000">Berlin</option>
+                                <option value="53.551,9.994,20000">Hamburg</option>
+                                <option value="48.137,11.576,20000">München</option>
+                                <option value="50.938,6.960,20000">Köln</option>
+                                <option value="50.111,8.682,20000">Frankfurt am Main</option>
+                                <option value="48.775,9.183,20000">Stuttgart</option>
+                                <option value="51.234,6.784,20000">Düsseldorf</option>
+                                <option value="51.481,7.216,20000">Dortmund</option>
+                                <option value="51.455,7.012,20000">Essen</option>
+                                <option value="53.080,8.806,15000">Bremen</option>
+                                <option value="51.340,12.375,15000">Leipzig</option>
+                                <option value="51.050,13.738,15000">Dresden</option>
+                                <option value="49.453,11.077,15000">Nürnberg</option>
+                                <option value="52.376,9.738,15000">Hannover</option>
+                                <option value="49.007,8.404,15000">Karlsruhe</option>
+                                <option value="52.264,10.521,15000">Braunschweig</option>
+                                <option value="54.323,10.123,15000">Kiel</option>
+                                <option value="52.131,11.640,15000">Magdeburg</option>
+                                <option value="54.088,12.131,15000">Rostock</option>
+                                <option value="51.313,9.481,15000">Kassel</option>
+                            </select>
+                            <p style="font-size:12px;color:var(--text-muted);margin-top:6px">Bevorzugt Adressen in der gewählten Region. Andere Adressen werden trotzdem gefunden.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3741,6 +3784,22 @@
                         if (q.length < 3) { dropdown.classList.remove('active'); return; }
                         this._locationTimer = setTimeout(function() { app.fetchLocationSuggestions(q); }, 300);
                     }
+                    showSettings() {
+                        var modal = document.getElementById('settingsModal');
+                        var region = localStorage.getItem('sitesketch_region') || '';
+                        document.getElementById('settingsRegion').value = region;
+                        modal.style.display = 'flex';
+                    }
+                    closeSettings() {
+                        document.getElementById('settingsModal').style.display = 'none';
+                    }
+                    saveSettings() {
+                        var val = document.getElementById('settingsRegion').value;
+                        localStorage.setItem('sitesketch_region', val);
+                        this._gAutoService = null;
+                        var label = document.getElementById('settingsRegion').options[document.getElementById('settingsRegion').selectedIndex].text;
+                        this.toast('Region: ' + label, 'success');
+                    }
                     fetchLocationSuggestions(query) {
                         var dropdown = document.getElementById('locationAutocomplete');
                         dropdown.innerHTML = '<div style="padding:12px;color:#8E8E93;font-size:13px;text-align:center">Suche...</div>';
@@ -3750,11 +3809,21 @@
                         if (!this._gAutoService) {
                             this._gAutoService = new google.maps.places.AutocompleteService();
                         }
-                        this._gAutoService.getPlacePredictions({
+                        var request = {
                             input: query,
                             componentRestrictions: { country: 'de' },
                             types: ['geocode', 'establishment']
-                        }, function(predictions, status) {
+                        };
+                        var region = localStorage.getItem('sitesketch_region') || '';
+                        if (region) {
+                            var parts = region.split(',');
+                            var lat = parseFloat(parts[0]);
+                            var lng = parseFloat(parts[1]);
+                            var radius = parseInt(parts[2]);
+                            request.location = new google.maps.LatLng(lat, lng);
+                            request.radius = radius;
+                        }
+                        this._gAutoService.getPlacePredictions(request, function(predictions, status) {
                             if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions || !predictions.length) {
                                 dropdown.innerHTML = '<div style="padding:12px;color:#8E8E93;font-size:13px;text-align:center">Keine Ergebnisse</div>';
                                 return;
